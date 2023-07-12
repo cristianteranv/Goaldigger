@@ -19,7 +19,7 @@ decorator==4.4.2
 Django==2.0.2
 dnspython==1.16.0
 docutils==0.15.2
-eventlet==0.28.0
+eventlet==0.30.2
 Flask==1.1.2
 Flask-SocketIO==4.3.1
 Flask-SQLAlchemy==2.1
@@ -32,6 +32,7 @@ google-auth-httplib2==0.0.4
 google-oauth==1.0.1
 googleapis-common-protos==1.52.0
 greenlet==0.4.17
+gunicorn==20.1.0
 heroku
 httplib2==0.18.1
 idna==2.10
