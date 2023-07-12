@@ -44,7 +44,7 @@ def createDummyData2():
     db.session.add(GroupsUsers( Users.query.filter_by(email="cdt34@njit.edu").first().id, 2))
     db.session.commit()
 '''
-class Users(db.Model):
+class Userss(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(200))
     name = db.Column(db.String(50), nullable=False)
@@ -65,7 +65,7 @@ class Goals(db.Model):
     '''Table for goals'''
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String())
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('userss.id'))
     description = db.Column(db.String())
     progress = db.Column(db.String())
     date = db.Column(db.DateTime, default=datetime.now)
@@ -101,9 +101,9 @@ class Groups(db.Model):
         self.description = description
         self.sidebar_text = sidebar_text
         
-class GroupsUsers(db.Model):
+class GroupsUserss(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('userss.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
     
     def __init__(self, user_id, group_id):
@@ -131,7 +131,7 @@ class Messages(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String())
     date = db.Column(db.DateTime, default=datetime.now)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('userss.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
 
     def __init__(self, text, user_id, group_id):

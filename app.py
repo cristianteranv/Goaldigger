@@ -57,8 +57,8 @@ def emit_newsfeed(channel, sid):
 
         }
         for db_users, db_goals in\
-        db.session.query(models.Users, models.Goals)\
-        .filter(models.Users.id == models.Goals.user_id)\
+        db.session.query(models.Userss, models.Goals)\
+        .filter(models.Userss.id == models.Goals.user_id)\
         .order_by(models.Goals.date).all()
     ]
     print("running emit_newsfeed")
@@ -90,10 +90,10 @@ def emit_group_feed(channel, groupName, sid):
                 "thumbs": db_goals.thumbs
             }
             for db_users, db_goals, db_groups_users in\
-            db.session.query(models.Users, models.Goals, models.GroupsUsers)\
-            .filter(models.GroupsUsers.group_id == groupObject.id)\
-            .filter(models.Users.id == models.GroupsUsers.user_id)\
-            .filter(models.Goals.user_id == models.GroupsUsers.user_id)\
+            db.session.query(models.Userss, models.Goals, models.GroupsUserss)\
+            .filter(models.GroupsUserss.group_id == groupObject.id)\
+            .filter(models.Userss.id == models.GroupsUserss.user_id)\
+            .filter(models.Goals.user_id == models.GroupsUserss.user_id)\
             .order_by(models.Goals.date).all()
         ]
         
@@ -127,8 +127,8 @@ def emit_category(channel, sid):
             "thumbs": db_goals.thumbs
         }
         for db_users, db_goals in\
-        db.session.query(models.Users, models.Goals)\
-        .filter(models.Users.id == models.Goals.user_id)\
+        db.session.query(models.Userss, models.Goals)\
+        .filter(models.Userss.id == models.Goals.user_id)\
         .filter(models.Goals.category == channel)\
         .order_by(models.Goals.date).all()
     ]
@@ -138,7 +138,7 @@ def emit_category(channel, sid):
 
 
 def push_new_user_to_db(email, username, image, is_signed_in, id_token):
-    db.session.add(models.Users(email, username, image, is_signed_in, id_token));
+    db.session.add(models.Userss(email, username, image, is_signed_in, id_token));
     db.session.commit();
 
 
@@ -158,12 +158,12 @@ def handle_message(data):
 
 @server_socket.on('new google user')
 def on_new_google_user(data):
-    user = db.session.query(models.Users).filter_by(email=data["email"]).first()
+    user = db.session.query(models.Userss).filter_by(email=data["email"]).first()
 
     if (not user):
         push_new_user_to_db(data['email'], data['username'], data['image'], "Null", data['id_token'])
 
-    user = db.session.query(models.Users).filter_by(email=data["email"]).first()
+    user = db.session.query(models.Userss).filter_by(email=data["email"]).first()
 
     personal_profile = {
         "username": data["username"],
@@ -184,13 +184,13 @@ def on_new_google_user(data):
     user_groups_names=[
         db_groups.name
         for db_groups, db_groups_users in\
-        db.session.query(models.Groups, models.GroupsUsers)\
-        .filter(models.GroupsUsers.user_id == user.id)\
-        .filter(models.GroupsUsers.group_id == models.Groups.id)\
+        db.session.query(models.Groups, models.GroupsUserss)\
+        .filter(models.GroupsUserss.user_id == user.id)\
+        .filter(models.GroupsUserss.group_id == models.Groups.id)\
         .order_by(models.Groups.name).all()
     ]
     print("Groups the user belongs to",user_groups_names)
-    user_groups_id= [ row.group_id for row in models.GroupsUsers.query.filter(models.GroupsUsers.user_id == user.id).all() ]
+    user_groups_id= [ row.group_id for row in models.GroupsUserss.query.filter(models.GroupsUserss.user_id == user.id).all() ]
 
     user_groups_goals = [
         {
@@ -203,10 +203,10 @@ def on_new_google_user(data):
             "post_text": db_goals.post_text
         }
         for db_user_id, db_goals, db_users in\
-        db.session.query(models.GroupsUsers.user_id.distinct(), models.Goals, models.Users)\
-        .filter(models.GroupsUsers.group_id.in_(user_groups_id))\
-        .join(models.Goals, models.GroupsUsers.user_id == models.Goals.user_id)\
-        .join(models.Users, models.Users.id == models.GroupsUsers.user_id)\
+        db.session.query(models.GroupsUserss.user_id.distinct(), models.Goals, models.Userss)\
+        .filter(models.GroupsUserss.group_id.in_(user_groups_id))\
+        .join(models.Goals, models.GroupsUserss.user_id == models.Goals.user_id)\
+        .join(models.Userss, models.Userss.id == models.GroupsUserss.user_id)\
         .order_by(models.Goals.date.desc()).all()
     ]
     server_socket.emit("user groups", {"user_groups_names": user_groups_names, "user_groups_goals": user_groups_goals}, request.sid)
@@ -331,7 +331,7 @@ def emit_google_info(channel):
         "username": user.name,
         "img_url": user.img_url,
         "user_id": user.id
-        } for user in db.session.query(models.Users).all()]
+        } for user in db.session.query(models.Userss).all()]
 
     server_socket.emit(channel, {
         'allusers' : all_users
@@ -340,11 +340,11 @@ def emit_google_info(channel):
 @server_socket.on("join")
 def join(data):
     print(data)
-    row = db.session.query(models.GroupsUsers)\
-    .filter(models.GroupsUsers.group_id == data["groupId"], models.GroupsUsers.user_id == data["userId"]).first()
+    row = db.session.query(models.GroupsUserss)\
+    .filter(models.GroupsUserss.group_id == data["groupId"], models.GroupsUserss.user_id == data["userId"]).first()
     print("row",row)
     if not row:
-        db.session.add(models.GroupsUsers(data["userId"], data["groupId"]))
+        db.session.add(models.GroupsUserss(data["userId"], data["groupId"]))
         db.session.commit()
 
 @server_socket.on("get_data")
